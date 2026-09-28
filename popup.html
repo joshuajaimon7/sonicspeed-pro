@@ -57,8 +57,11 @@
           </svg>
         </div>
         <h3>No Video Detected</h3>
-        <p>Open YouTube, Netflix, Coursera, Loom, or our interactive test page to control playback.</p>
-        <button class="primary-btn" id="openDemoBtn">Open Test Grounds</button>
+        <p>If this tab was opened before installing, refresh once to connect.</p>
+        <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
+          <button class="primary-btn" id="reloadTabBtn" style="flex: 1;">Refresh Tab</button>
+          <button class="primary-btn" id="openDemoBtn" style="flex: 1; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);">Test Grounds</button>
+        </div>
       </div>
 
       <!-- Controls View -->

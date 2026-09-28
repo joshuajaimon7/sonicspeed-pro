@@ -1,12 +1,15 @@
 {
   "manifest_version": 3,
   "name": "SonicSpeed Pro - 16x Video Accelerator & Voice Booster",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Accelerate any video up to 16x, auto-skip dead air pauses, boost quiet audio up to 600%, and enhance voice clarity. Private and on-device.",
   "permissions": [
     "activeTab",
     "scripting",
     "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -26,7 +29,8 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "css": ["content.css"],
-      "all_frames": true
+      "all_frames": true,
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [

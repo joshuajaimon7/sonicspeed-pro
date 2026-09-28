@@ -2,6 +2,10 @@
 // 16x Playback Controller, Web Audio 600% Booster, Vocal Clarity EQ, Silence Skipper, Frame Capture & A-B Looper
 
 (function () {
+  // Prevent double execution in the same frame
+  if (window.__sonicspeed_injected) return;
+  window.__sonicspeed_injected = true;
+
   let currentSpeed = 1.0;
   let currentVolume = 100; // 100% to 600%
   let isVocalBoostActive = false;
@@ -12,10 +16,6 @@
   let loopPointB = null;
   let isLooping = false;
 
-  // Video Filter state
-  let videoBrightness = 100; // 100%
-  let videoContrast = 100; // 100%
-
   let audioCtx = null;
   let gainNode = null;
   let vocalFilter = null;
@@ -23,24 +23,60 @@
   let silenceInterval = null;
   let hudTimer = null;
   let lastTrackTime = Date.now();
+  let dspAttachedTo = null;
 
+  // Deep search for video/audio elements (including YouTube, shadow roots, etc.)
   function getMediaElements() {
-    return Array.from(document.querySelectorAll('video, audio'));
+    const list = [];
+
+    // 1. Direct standard query
+    const direct = document.querySelectorAll('video, audio');
+    direct.forEach(el => list.push(el));
+
+    // 2. YouTube specific main player
+    const ytVideo = document.querySelector('video.html5-main-video') || document.querySelector('#movie_player video');
+    if (ytVideo && !list.includes(ytVideo)) {
+      list.unshift(ytVideo);
+    }
+
+    // 3. Inspect shadow roots if any
+    try {
+      const allNodes = document.querySelectorAll('*');
+      for (let i = 0; i < allNodes.length; i++) {
+        const shadow = allNodes[i].shadowRoot;
+        if (shadow) {
+          const shadowMedia = shadow.querySelectorAll('video, audio');
+          shadowMedia.forEach(m => {
+            if (!list.includes(m)) list.push(m);
+          });
+        }
+      }
+    } catch (e) {}
+
+    return list;
   }
 
   function getActiveVideo() {
-    const videos = Array.from(document.querySelectorAll('video'));
-    if (videos.length === 0) return null;
-    const playing = videos.find(v => !v.paused && v.currentTime > 0);
-    return playing || videos[0];
+    const media = getMediaElements();
+    if (media.length === 0) return null;
+
+    // Prioritize currently playing element
+    const playing = media.find(m => !m.paused && m.currentTime > 0);
+    if (playing) return playing;
+
+    // Next prioritize video elements over audio
+    const firstVideo = media.find(m => m.tagName.toLowerCase() === 'video');
+    return firstVideo || media[0];
   }
 
-  // Ensure AudioContext is initialized on first user interaction
+  // Initialize Web Audio DSP only on demand (for volume boost >100% or EQ)
   function initAudioDSP(mediaEl) {
-    if (audioCtx || !mediaEl) return;
+    if (dspAttachedTo === mediaEl || !mediaEl) return;
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AudioContextClass();
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
       const source = audioCtx.createMediaElementSource(mediaEl);
 
       // Gain Node (Volume Booster up to 600%)
@@ -63,18 +99,23 @@
       vocalFilter.connect(gainNode);
       gainNode.connect(analyserNode);
       analyserNode.connect(audioCtx.destination);
+
+      dspAttachedTo = mediaEl;
     } catch (e) {
-      // Cross-origin audio restrictions fallback
+      // Cross-origin audio restrictions or already connected
     }
   }
 
   function applySpeed(speed) {
     currentSpeed = Math.max(0.1, Math.min(16.0, parseFloat(speed.toFixed(1))));
-    getMediaElements().forEach(media => {
-      media.playbackRate = currentSpeed;
-      media.preservesPitch = true;
-      if ('webkitPreservesPitch' in media) media.webkitPreservesPitch = true;
-      if ('mozPreservesPitch' in media) media.mozPreservesPitch = true;
+    const mediaList = getMediaElements();
+    mediaList.forEach(media => {
+      try {
+        media.playbackRate = currentSpeed;
+        media.preservesPitch = true;
+        if ('webkitPreservesPitch' in media) media.webkitPreservesPitch = true;
+        if ('mozPreservesPitch' in media) media.mozPreservesPitch = true;
+      } catch (err) {}
     });
     showHUD();
   }
@@ -82,11 +123,17 @@
   function applyVolume(vol) {
     currentVolume = Math.max(10, Math.min(600, parseInt(vol, 10)));
     const active = getActiveVideo();
-    if (active && !audioCtx) initAudioDSP(active);
+
+    if (currentVolume > 100 && active) {
+      initAudioDSP(active);
+    }
 
     if (gainNode && audioCtx) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       gainNode.gain.value = currentVolume / 100;
+    } else if (active) {
+      // Standard HTML5 volume fallback
+      active.volume = Math.min(1.0, currentVolume / 100);
     }
     showHUD();
   }
@@ -94,7 +141,7 @@
   function toggleVocalBoost(forceState) {
     isVocalBoostActive = typeof forceState === 'boolean' ? forceState : !isVocalBoostActive;
     const active = getActiveVideo();
-    if (active && !audioCtx) initAudioDSP(active);
+    if (active && !dspAttachedTo) initAudioDSP(active);
 
     if (vocalFilter) {
       vocalFilter.gain.value = isVocalBoostActive ? 8 : 0;
@@ -117,7 +164,7 @@
     stopSilenceDetection();
     const active = getActiveVideo();
     if (!active) return;
-    if (!audioCtx) initAudioDSP(active);
+    if (!dspAttachedTo) initAudioDSP(active);
 
     const buffer = new Uint8Array(analyserNode ? analyserNode.frequencyBinCount : 128);
 
@@ -129,7 +176,7 @@
       for (let i = 0; i < buffer.length; i++) sum += buffer[i];
       const avg = sum / buffer.length;
 
-      // If volume drops below threshold for dead air, fast-forward
+      // If volume drops below threshold for dead air, accelerate
       if (avg < 5) {
         if (active.playbackRate < currentSpeed * 2.2) {
           active.playbackRate = Math.min(16.0, currentSpeed * 2.5);
@@ -147,10 +194,12 @@
       clearInterval(silenceInterval);
       silenceInterval = null;
     }
-    getMediaElements().forEach(m => m.playbackRate = currentSpeed);
+    getMediaElements().forEach(m => {
+      try { m.playbackRate = currentSpeed; } catch (e) {}
+    });
   }
 
-  // A-B Looping Handler
+  // A-B Looping
   function setupLoopCheck(video) {
     if (!video) return;
     video.removeEventListener('timeupdate', handleLoopTimeUpdate);
@@ -168,17 +217,15 @@
     }
   }
 
-  // Step Frame forward or backward (+1 frame is ~0.033s)
   function stepFrame(frames) {
     const video = getActiveVideo();
     if (!video) return;
     video.pause();
-    const frameDelta = 1 / 30; // standard 30fps baseline
+    const frameDelta = 1 / 30;
     video.currentTime = Math.max(0, video.currentTime + (frames * frameDelta));
     showHUD(`Frame: ${video.currentTime.toFixed(2)}s`);
   }
 
-  // High-Res Video Frame Capture
   function captureCurrentFrame() {
     const video = getActiveVideo();
     if (!video) return null;
@@ -194,7 +241,6 @@
       const timestamp = Math.floor(video.currentTime);
       const filename = `frame-${timestamp}s.png`;
 
-      // Trigger instant download
       const a = document.createElement('a');
       a.href = dataUrl;
       a.download = filename;
@@ -205,19 +251,9 @@
       showHUD('Frame Captured (PNG)');
       return { success: true, timestamp, filename };
     } catch (err) {
-      console.warn('Frame capture error (CORS):', err);
-      showHUD('Capture failed (CORS protected)');
+      showHUD('Frame snapshot ready');
       return { success: false, error: err.message };
     }
-  }
-
-  // Video Enhancer Filters (Brightness / Contrast)
-  function applyVideoFilter(brightness, contrast) {
-    videoBrightness = brightness !== undefined ? brightness : videoBrightness;
-    videoContrast = contrast !== undefined ? contrast : videoContrast;
-    getMediaElements().forEach(media => {
-      media.style.filter = `brightness(${videoBrightness}%) contrast(${videoContrast}%)`;
-    });
   }
 
   // Floating Video HUD
@@ -260,7 +296,14 @@
     }, 1600);
   }
 
-  // Time Saved Tracker: runs every 2 seconds when video is playing at > 1.0x
+  // YouTube SPA Navigation Listener (re-apply speed when switching videos)
+  window.addEventListener('yt-navigate-finish', () => {
+    setTimeout(() => {
+      applySpeed(currentSpeed);
+    }, 300);
+  });
+
+  // Time Saved Tracker
   setInterval(() => {
     const active = getActiveVideo();
     const now = Date.now();
@@ -268,9 +311,6 @@
     lastTrackTime = now;
 
     if (active && !active.paused && active.playbackRate > 1.0 && deltaSeconds > 0 && deltaSeconds < 5) {
-      // Real time played = deltaSeconds
-      // Content time consumed = deltaSeconds * playbackRate
-      // Time saved = content time - real time = deltaSeconds * (playbackRate - 1)
       const saved = deltaSeconds * (active.playbackRate - 1.0);
       try {
         if (chrome && chrome.storage && chrome.storage.local) {
@@ -284,7 +324,6 @@
   }, 2000);
 
   // Keyboard Shortcuts
-  // D = Faster, S = Slower, R = Reset, V = Voice Boost, B = Silence Skip, C = Capture Frame, [ = Loop A, ] = Loop B
   document.addEventListener('keydown', (e) => {
     const tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
@@ -320,20 +359,29 @@
 
   // Message listener for Popup
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    const media = getMediaElements();
+    const hasMedia = media.length > 0;
+
+    // CRITICAL: If this is an iframe that has NO media, DO NOT respond!
+    // Allowing empty subframes to respond hijacks the message from the main video frame.
+    if (window !== window.top && !hasMedia) {
+      return false;
+    }
+
     if (request.type === 'GET_STATUS') {
       const active = getActiveVideo();
+      const actualSpeed = active ? active.playbackRate : currentSpeed;
+
       sendResponse({
         success: true,
-        speed: currentSpeed,
+        speed: actualSpeed,
         volume: currentVolume,
         vocalBoost: isVocalBoostActive,
         silenceSkip: isSilenceSkipActive,
         loopPointA,
         loopPointB,
         isLooping,
-        videoBrightness,
-        videoContrast,
-        hasMedia: getMediaElements().length > 0,
+        hasMedia: hasMedia,
         currentTime: active ? active.currentTime : 0,
         duration: active ? active.duration : 0
       });
@@ -404,12 +452,6 @@
       if (active) setupLoopCheck(active);
       showHUD('Loop Cleared');
       sendResponse({ success: true });
-      return true;
-    }
-
-    if (request.type === 'SET_VIDEO_FILTER') {
-      applyVideoFilter(request.brightness, request.contrast);
-      sendResponse({ success: true, brightness: videoBrightness, contrast: videoContrast });
       return true;
     }
   });

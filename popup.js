@@ -104,36 +104,67 @@ async function initTabCommunication() {
       return;
     }
     activeTabId = tabs[0].id;
+    const tabUrl = tabs[0].url || '';
 
-    // Send probe
-    chrome.tabs.sendMessage(activeTabId, { type: 'GET_STATUS' }, (response) => {
-      if (chrome.runtime.lastError || !response) {
-        // Try injecting content script if not already present
-        chrome.scripting.executeScript({
-          target: { tabId: activeTabId },
-          files: ['content.js']
-        }, () => {
-          if (chrome.runtime.lastError) {
-            showEmptyState();
-          } else {
-            // Re-query after injection
+    // Ignore restricted internal pages
+    if (tabUrl.startsWith('chrome://') || tabUrl.startsWith('edge://') || tabUrl.startsWith('about:')) {
+      showEmptyState();
+      return;
+    }
+
+    function tryConnect(attempt = 1) {
+      // 1. Try sending to frameId: 0 (top frame where YouTube, Netflix, etc. live)
+      chrome.tabs.sendMessage(activeTabId, { type: 'GET_STATUS' }, { frameId: 0 }, (response) => {
+        if (!chrome.runtime.lastError && response && response.hasMedia) {
+          showControls(response);
+          return;
+        }
+
+        // 2. If frame 0 had connection error, dynamically inject content script
+        if (chrome.runtime.lastError) {
+          chrome.scripting.executeScript({
+            target: { tabId: activeTabId },
+            files: ['content.js']
+          }, () => {
+            if (chrome.runtime.lastError) {
+              if (attempt < 3) {
+                setTimeout(() => tryConnect(attempt + 1), 200);
+              } else {
+                showEmptyState();
+              }
+              return;
+            }
+
+            // Retry after injection
             setTimeout(() => {
-              chrome.tabs.sendMessage(activeTabId, { type: 'GET_STATUS' }, (retryRes) => {
+              chrome.tabs.sendMessage(activeTabId, { type: 'GET_STATUS' }, { frameId: 0 }, (retryRes) => {
                 if (retryRes && retryRes.hasMedia) {
                   showControls(retryRes);
+                } else if (attempt < 3) {
+                  setTimeout(() => tryConnect(attempt + 1), 250);
                 } else {
                   showEmptyState();
                 }
               });
             }, 100);
+          });
+          return;
+        }
+
+        // 3. Frame 0 responded but hasMedia was false: check subframes or retry
+        chrome.tabs.sendMessage(activeTabId, { type: 'GET_STATUS' }, (subRes) => {
+          if (subRes && subRes.hasMedia) {
+            showControls(subRes);
+          } else if (attempt < 3) {
+            setTimeout(() => tryConnect(attempt + 1), 300);
+          } else {
+            showEmptyState();
           }
         });
-      } else if (response.hasMedia) {
-        showControls(response);
-      } else {
-        showEmptyState();
-      }
-    });
+      });
+    }
+
+    tryConnect(1);
   } catch (e) {
     showEmptyState();
   }
@@ -347,6 +378,17 @@ function setupEventListeners() {
   openDemoBtn.addEventListener('click', () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('demo-test.html') });
   });
+
+  const reloadTabBtn = document.getElementById('reloadTabBtn');
+  if (reloadTabBtn) {
+    reloadTabBtn.addEventListener('click', () => {
+      if (activeTabId) {
+        chrome.tabs.reload(activeTabId, () => {
+          window.close();
+        });
+      }
+    });
+  }
 
   // Upgrade Modal Handlers
   upgradeBtn.addEventListener('click', () => {
