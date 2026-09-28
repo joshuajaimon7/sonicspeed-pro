@@ -3,7 +3,7 @@
 
 const FREE_MAX_SPEED = 2.5;
 const FREE_MAX_VOLUME = 200;
-const STORE_CHECKOUT_URL = "https://tinystacklabs.lemonsqueezy.com/buy/sonicspeed-pro";
+const STORE_CHECKOUT_URL = "https://micro-software-lab.lemonsqueezy.com/checkout/buy/8b252720-b345-4cb4-9a84-91086b5ecb11";
 
 let isPro = false;
 let activeTabId = null;
