@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SonicSpeed Pro - 16x Video Accelerator, Silence Skipper & 600% Audio Booster</title>
+  <meta name="description" content="Accelerate any web video up to 16x, auto-skip dead-air pauses, boost quiet audio to 600%, and capture pristine lecture slides. 100% private, on-device.">
+  <style>
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #0d0d0f;
+      --bg-tertiary: #161618;
+      --border-color: #242426;
+      --text-primary: #f5f5f7;
+      --text-secondary: #86868b;
+      --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-stack);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    nav {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      background: #ffffff;
+      color: #000000;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.15s ease;
+    }
+    .nav-link:hover { color: var(--text-primary); }
+    .nav-btn {
+      background: #ffffff;
+      color: #000000;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 16px;
+      transition: opacity 0.15s ease;
+    }
+    .nav-btn:hover { opacity: 0.88; }
+    
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .badge {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #30d158;
+    }
+    h1 {
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.12;
+      max-width: 780px;
+      margin-bottom: 20px;
+    }
+    .subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+    .cta-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .primary-cta {
+      background: #ffffff;
+      color: #000000;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 26px;
+      border-radius: 8px;
+      transition: opacity 0.15s ease;
+    }
+    .primary-cta:hover { opacity: 0.9; }
+    .secondary-cta {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 22px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      transition: background 0.15s ease;
+    }
+    .secondary-cta:hover { background: var(--bg-tertiary); }
+
+    .preview-box {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.8);
+      margin-bottom: 80px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 80px;
+    }
+    @media (max-width: 768px) {
+      .features-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 36px; }
+    }
+    .feature-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+    }
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .pricing-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 40px;
+      text-align: center;
+      max-width: 480px;
+      margin: 0 auto 80px;
+    }
+    .pricing-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .pricing-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+    .price-value { font-size: 44px; font-weight: 700; }
+    .price-term { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+    .perks-list {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .perks-list li {
+      font-size: 13px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .perks-list li::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #ffffff;
+      flex-shrink: 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 32px 0 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    footer a { color: var(--text-secondary); text-decoration: none; }
+    footer a:hover { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="#" class="brand">
+        <div class="brand-mark">SS</div>
+        <span>SonicSpeed Pro</span>
+      </a>
+      <div class="nav-links">
+        <a href="demo-test.html" class="nav-link">Interactive Test</a>
+        <a href="privacy.html" class="nav-link">Privacy</a>
+        <a href="https://tinystacklabs.lemonsqueezy.com/buy/sonicspeed-pro" class="nav-btn">Get Pro - $4.99</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="badge">
+        <div class="badge-dot"></div>
+        <span>100% On-Device Web Audio DSP Engine</span>
+      </div>
+      <h1>Unlock 16x Speed, Skip Dead Air & Boost Quiet Audio to 600%.</h1>
+      <p class="subtitle">The definitive video accelerator for lectures, tutorials, and meetings. Cut learning time in half with intelligent silence skipping, vocal clarity EQ, and 1-click slide capture.</p>
+      
+      <div class="cta-row">
+        <a href="https://tinystacklabs.lemonsqueezy.com/buy/sonicspeed-pro" class="primary-cta">Get Lifetime License ($4.99)</a>
+        <a href="demo-test.html" class="secondary-cta">Launch Test Grounds</a>
+      </div>
+
+      <div class="preview-box">
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 500;">SUPPORTED PLATFORMS</div>
+        <div style="display: flex; justify-content: center; gap: 24px; color: var(--text-primary); font-size: 13px; font-weight: 500; flex-wrap: wrap;">
+          <span>YouTube</span>
+          <span>•</span>
+          <span>Netflix</span>
+          <span>•</span>
+          <span>Coursera</span>
+          <span>•</span>
+          <span>Udemy</span>
+          <span>•</span>
+          <span>Loom</span>
+          <span>•</span>
+          <span>Vimeo</span>
+          <span>•</span>
+          <span>HTML5 Video Players</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <div class="feature-title">16.0x Playback Velocity</div>
+        <div class="feature-desc">Go far beyond standard 2x restrictions. Granular 0.1x steps with built-in pitch preservation for crystal clear listening without distortion.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          </svg>
+        </div>
+        <div class="feature-title">Auto-Skip Dead Air & Hesitations</div>
+        <div class="feature-desc">Real-time Fast Fourier Transform analysis detects dead silence and fast-forwards through it automatically, saving 20–30 mins per lecture.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </div>
+        <div class="feature-title">600% Audio Gain Booster</div>
+        <div class="feature-desc">Overcomes faint microphones and quiet conference calls with Web Audio API hardware gain amplification up to 600%.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H2v-8zM18 12h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2v-8z"/>
+            <path d="M6 12a6 6 0 0 1 12 0"/>
+          </svg>
+        </div>
+        <div class="feature-title">Vocal Clarity & Speech EQ</div>
+        <div class="feature-desc">Custom 3kHz biquad peaking filter boosts vocal intelligibility while attenuating low-frequency ambient rumble and HVAC noise.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
+        <div class="feature-title">1-Click High-Res Slide Capture</div>
+        <div class="feature-desc">Instantly snapshot clean presentation slides, code snippets, and diagrams directly to PNG without player controls or watermarks.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+        </div>
+        <div class="feature-title">A-B Infinite Segment Looper</div>
+        <div class="feature-desc">Mark Point A and Point B to loop any complex tutorial segment repeatedly until mastery is achieved.</div>
+      </div>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">SonicSpeed Pro Lifetime</div>
+      <div class="pricing-sub">One payment. Zero subscriptions. All future updates included.</div>
+      <div class="price-value">$4.99</div>
+      <div class="price-term">one-time lifetime license</div>
+      <ul class="perks-list">
+        <li>Unlimited velocity up to 16.0x</li>
+        <li>Real-Time Silence & Dead Air Skipper</li>
+        <li>600% Audio Gain Amplifier</li>
+        <li>Vocal Clarity & Speech Enhancement EQ</li>
+        <li>A-B Infinite Section Looper</li>
+        <li>1-Click High-Res Frame Capture</li>
+        <li>100% on-device & private</li>
+      </ul>
+      <a href="https://tinystacklabs.lemonsqueezy.com/buy/sonicspeed-pro" class="primary-cta" style="display: block; text-align: center;">Get Pro Lifetime ($4.99)</a>
+    </div>
+
+    <footer>
+      <div>&copy; 2026 TinyStack Labs. All rights reserved.</div>
+      <div style="display: flex; gap: 16px;">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="demo-test.html">Test Grounds</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

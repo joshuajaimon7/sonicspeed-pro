@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SonicSpeed Pro - Interactive Media Test Grounds</title>
+  <style>
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #121214;
+      --bg-tertiary: #1c1c1e;
+      --border-color: #242426;
+      --text-primary: #f5f5f7;
+      --text-secondary: #86868b;
+      --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-stack);
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      width: 100%;
+      max-width: 820px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      width: 32px;
+      height: 32px;
+      background: #ffffff;
+      color: #000000;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    h1 { font-size: 19px; font-weight: 600; }
+    p.sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+    
+    .media-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000000;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .controls-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    button.btn {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    button.btn:hover {
+      background: #28282b;
+      border-color: #3e3e42;
+    }
+    button.btn.primary {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+      font-weight: 600;
+    }
+    .readout {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-feature-settings: "tnum";
+    }
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .spec-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .spec-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .spec-desc {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <div class="logo-badge">SS</div>
+        <div>
+          <h1>SonicSpeed Pro - Media Test Grounds</h1>
+          <p class="sub">Open the SonicSpeed Pro extension popup or use hotkeys (D, S, R, C, [ , ]) to test playback acceleration.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="media-card">
+      <div class="video-wrapper">
+        <video id="testVideo" controls playsinline loop></video>
+      </div>
+
+      <div class="controls-strip">
+        <button class="btn primary" id="playBtn">Play Test Signal</button>
+        <button class="btn" id="generateSpeechBtn">Simulate Lecture with Hesitations</button>
+        <button class="btn" id="addVolumeTrackBtn">Low Whisper Audio (Test Gain)</button>
+        <span class="readout" id="videoReadout">Speed: 1.0x | Vol: 100% | Time: 0.0s</span>
+      </div>
+    </div>
+
+    <div class="specs-grid">
+      <div class="spec-box">
+        <div class="spec-title">16x Playback Engine</div>
+        <div class="spec-desc">Exceeds standard 2.0x limits. Press <strong>D</strong> to accelerate by 0.1x steps up to 16.0x with native pitch-preservation.</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-title">600% Audio Gain</div>
+        <div class="spec-desc">Employs Web Audio API GainNodes to boost quiet lectures, muted Zoom recordings, and low-dB audio by up to 6x.</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-title">Dead-Air Silence Skipper</div>
+        <div class="spec-desc">Real-time Fast Fourier Transform (FFT) analysis identifies dead pauses and speeds through them instantly.</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-title">1-Click Frame Capture</div>
+        <div class="spec-desc">Press <strong>C</strong> or click "Capture Frame" in the popup to grab pristine, high-res presentation frames directly to PNG.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate self-contained Canvas video stream with audio to ensure 100% offline reliability
+    const video = document.getElementById('testVideo');
+    const playBtn = document.getElementById('playBtn');
+    const videoReadout = document.getElementById('videoReadout');
+    const generateSpeechBtn = document.getElementById('generateSpeechBtn');
+    const addVolumeTrackBtn = document.getElementById('addVolumeTrackBtn');
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1280;
+    canvas.height = 720;
+    const ctx = canvas.getContext('2d');
+
+    let frame = 0;
+    function drawTestVideo() {
+      frame++;
+      // Background gradient
+      const grad = ctx.createLinearGradient(0, 0, 1280, 720);
+      grad.addColorStop(0, '#0a0a0c');
+      grad.addColorStop(1, '#18181b');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1280, 720);
+
+      // Rotating radar or sonic rings
+      const cx = 640;
+      const cy = 360;
+      ctx.strokeStyle = '#27272a';
+      ctx.lineWidth = 2;
+      for (let r = 50; r <= 300; r += 50) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Animated wave bar
+      const time = frame * 0.05;
+      ctx.fillStyle = '#ffffff';
+      for (let i = -15; i <= 15; i++) {
+        const barHeight = Math.sin(time + i * 0.3) * 60 + 80;
+        ctx.fillRect(cx + i * 20 - 4, cy - barHeight / 2, 8, barHeight);
+      }
+
+      // Timecode
+      ctx.fillStyle = '#f5f5f7';
+      ctx.font = 'bold 36px -apple-system, SF Pro Text, sans-serif';
+      ctx.textAlign = 'center';
+      const sec = (frame / 30).toFixed(2);
+      ctx.fillText(`SONICSPEED LAB • ${sec}s`, cx, 140);
+
+      ctx.fillStyle = '#86868b';
+      ctx.font = '20px -apple-system, SF Pro Text, sans-serif';
+      ctx.fillText('Interactive Video Test Ground • Ready for 16x Acceleration', cx, 180);
+
+      requestAnimationFrame(drawTestVideo);
+    }
+    drawTestVideo();
+
+    // Stream Canvas into video element
+    const stream = canvas.captureStream(30);
+
+    // Audio synthesizer for audio test signal
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const dest = audioCtx.createMediaStreamDestination();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime); // 440 Hz standard tone
+    gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime); // gentle volume
+    osc.connect(gainNode);
+    gainNode.connect(dest);
+    osc.start();
+
+    // Add audio track to canvas stream
+    const audioTrack = dest.stream.getAudioTracks()[0];
+    if (audioTrack) stream.addTrack(audioTrack);
+
+    video.srcObject = stream;
+
+    playBtn.addEventListener('click', () => {
+      if (video.paused) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        video.play();
+        playBtn.textContent = 'Pause Test Signal';
+      } else {
+        video.pause();
+        playBtn.textContent = 'Play Test Signal';
+      }
+    });
+
+    generateSpeechBtn.addEventListener('click', () => {
+      if ('speechSynthesis' in window) {
+        const text = "Welcome to SonicSpeed Pro. Notice how the silence skipping feature accelerates through quiet pauses and keeps lectures moving efficiently.";
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 1.0;
+        window.speechSynthesis.speak(utter);
+      }
+    });
+
+    addVolumeTrackBtn.addEventListener('click', () => {
+      // Lower test tone to faint whisper to test 600% booster
+      gainNode.gain.setValueAtTime(0.005, audioCtx.currentTime);
+      alert('Audio signal attenuated to whisper level. Use the 600% Volume Booster to amplify!');
+    });
+
+    // Sync readout
+    setInterval(() => {
+      videoReadout.textContent = `Speed: ${video.playbackRate.toFixed(1)}x | Vol: ${Math.round(video.volume * 100)}% | Time: ${video.currentTime.toFixed(1)}s`;
+    }, 250);
+  </script>
+</body>
+</html>

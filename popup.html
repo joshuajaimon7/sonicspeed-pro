@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SonicSpeed Pro</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-mark">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">
+            <span>SonicSpeed</span>
+            <span class="badge-pro" id="proHeaderBadge">PRO</span>
+          </div>
+          <div class="brand-sub">Video Accelerator & Audio DSP</div>
+        </div>
+      </div>
+      <button class="upgrade-btn" id="upgradeBtn">Upgrade</button>
+    </header>
+
+    <!-- Time Saved Widget -->
+    <div class="time-saved-banner" id="timeSavedBanner">
+      <div class="time-saved-icon">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <span class="time-saved-label">Time Saved:</span>
+      <span class="time-saved-value" id="timeSavedDisplay">0 min</span>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="statusBar">
+      <div class="status-indicator" id="statusIndicator"></div>
+      <span id="statusText">Scanning active media...</span>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+        </div>
+        <h3>No Video Detected</h3>
+        <p>Open YouTube, Netflix, Coursera, Loom, or our interactive test page to control playback.</p>
+        <button class="primary-btn" id="openDemoBtn">Open Test Grounds</button>
+      </div>
+
+      <!-- Controls View -->
+      <div class="controls-view" id="controlsView" style="display: none;">
+        <!-- Speed Card -->
+        <div class="control-card">
+          <div class="card-head">
+            <span class="card-label">Playback Velocity</span>
+            <span class="metric-display" id="speedDisplay">1.0x</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="speedSlider" min="0.5" max="16.0" step="0.1" value="1.0" class="slider-range">
+          </div>
+          <div class="preset-row">
+            <button class="preset-pill active" data-speed="1.0">1.0x</button>
+            <button class="preset-pill" data-speed="1.5">1.5x</button>
+            <button class="preset-pill" data-speed="2.0">2.0x</button>
+            <button class="preset-pill" data-speed="2.5">2.5x</button>
+            <button class="preset-pill pro-tag-btn" data-speed="3.5">3.5x</button>
+            <button class="preset-pill pro-tag-btn" data-speed="5.0">5.0x</button>
+          </div>
+        </div>
+
+        <!-- Volume Booster Card -->
+        <div class="control-card">
+          <div class="card-head">
+            <span class="card-label">Audio Gain Amplifier</span>
+            <span class="metric-display" id="volumeDisplay">100%</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="volumeSlider" min="100" max="600" step="10" value="100" class="slider-range">
+          </div>
+          <div class="preset-row">
+            <button class="preset-pill active" data-vol="100">100%</button>
+            <button class="preset-pill" data-vol="150">150%</button>
+            <button class="preset-pill" data-vol="200">200%</button>
+            <button class="preset-pill pro-tag-btn" data-vol="350">350%</button>
+            <button class="preset-pill pro-tag-btn" data-vol="600">600%</button>
+          </div>
+        </div>
+
+        <!-- Speech & Silence Intelligence -->
+        <div class="feature-toggles">
+          <div class="toggle-card" id="silenceToggleCard">
+            <div>
+              <div class="toggle-title">Auto-Skip Dead Air & Silence</div>
+              <div class="toggle-sub">Speeds through hesitations and awkward pauses (~25% saved)</div>
+            </div>
+            <input type="checkbox" id="silenceCheckbox" class="apple-switch">
+          </div>
+
+          <div class="toggle-card" id="vocalToggleCard">
+            <div>
+              <div class="toggle-title">Vocal Clarity & Speech EQ</div>
+              <div class="toggle-sub">Boosts 3kHz human voice frequencies and cuts background hum</div>
+            </div>
+            <input type="checkbox" id="vocalCheckbox" class="apple-switch">
+          </div>
+        </div>
+
+        <!-- Study & Analysis Toolkit (Frame Capture & A-B Looper) -->
+        <div class="section-divider">
+          <span>Study & Lecture Tools</span>
+        </div>
+
+        <div class="tools-grid">
+          <button class="tool-btn" id="captureFrameBtn" title="Grab clean high-res video screenshot without UI">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span>Capture Frame</span>
+          </button>
+
+          <button class="tool-btn" id="stepPrevBtn" title="Step back 1 frame">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="19 20 9 12 19 4 19 20"/>
+              <line x1="5" y1="19" x2="5" y2="5"/>
+            </svg>
+            <span>-1 Frame</span>
+          </button>
+
+          <button class="tool-btn" id="stepNextBtn" title="Step forward 1 frame">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"/>
+              <line x1="19" y1="5" x2="19" y2="19"/>
+            </svg>
+            <span>+1 Frame</span>
+          </button>
+        </div>
+
+        <!-- A-B Looping Row -->
+        <div class="loop-bar">
+          <span class="loop-label">A-B Looper:</span>
+          <button class="loop-btn" id="loopSetABtn">Set [A]</button>
+          <button class="loop-btn" id="loopSetBBtn">Set [B]</button>
+          <button class="loop-btn clear" id="loopClearBtn">Clear</button>
+          <span class="loop-status" id="loopStatusDisplay">Off</span>
+        </div>
+
+        <!-- Hotkeys Footer Hint -->
+        <div class="hotkeys-hint">
+          <span>Shortcuts: <strong>D</strong> +0.1x • <strong>S</strong> -0.1x • <strong>R</strong> reset • <strong>C</strong> snap • <strong>[ / ]</strong> loop</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="pro-banner" id="footerBanner">
+        <span>Free tier: Max 2.5x speed & 200% volume</span>
+        <a href="#" id="proUpgradeLink" class="pro-link">Upgrade to Lifetime ($4.99)</a>
+      </div>
+    </footer>
+
+    <!-- Upgrade Modal -->
+    <div class="modal-backdrop" id="upgradeModal" style="display: none;">
+      <div class="modal-box">
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+        <h2>SonicSpeed Pro</h2>
+        <p class="modal-desc">Save hours every week with automatic dead-air skipping, vocal clarity enhancement, and ultra-speed up to 16x.</p>
+        <ul class="modal-perks">
+          <li>Auto-Skip Dead Air & Silence (saves 20–30 mins per lecture)</li>
+          <li>Vocal Clarity & Speech Enhancement DSP (3kHz Voice Boost)</li>
+          <li>SuperSpeed up to 16.0x with zero chipmunk pitch distortion</li>
+          <li>Safe 600% Volume Audio Gain Amplifier</li>
+          <li>A-B Infinite Segment Looper & 1-Click Frame Capture</li>
+          <li>Lifetime license with all future updates</li>
+        </ul>
+        <div class="price-tag">
+          <span class="price-val">$4.99</span>
+          <span class="price-period">one-time payment</span>
+        </div>
+        <button class="checkout-btn" id="startCheckoutBtn">Buy Lifetime License ($4.99)</button>
+
+        <div class="license-box">
+          <div class="license-title">Already purchased? Activate key:</div>
+          <div class="license-input-row">
+            <input type="text" id="licenseKeyInput" class="license-input" placeholder="Paste license key...">
+            <button class="license-activate-btn" id="activateKeyBtn">Activate</button>
+          </div>
+          <div class="license-status" id="licenseStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
